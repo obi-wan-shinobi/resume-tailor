@@ -7,7 +7,7 @@
 //
 // Or via the Python renderer which passes sys.inputs.data automatically.
 
-#import "@preview/fontawesome:0.6.2"
+#import "@preview/fontawesome:0.6.2": *
 
 // ── Load Dynamic Data ──
 #let data = json("../" + sys.inputs.at("data"))
@@ -26,8 +26,8 @@
 #set list(
   indent: 0.2em,
   body-indent: 0.5em,
-  spacing: 4.5pt,
-  marker: [•],
+  spacing: 0.8em,
+  marker: sym.bullet,
 )
 
 // Link styling — match LaTeX \definecolor{linkblue}{HTML}{1F4E79}
@@ -40,9 +40,8 @@
 #let section-heading(title) = {
   v(0.8em)
   text(size: 12pt, weight: "bold", title)
-  v(-5pt)
+  v(-3pt)
   line(length: 100%, stroke: 0.5pt)
-  v(0.4em)
 }
 
 // Resume heading macro — matches \resumeheading{company}{dates}{role}{location}
@@ -62,7 +61,7 @@
     text(style: "italic", role),
     text(style: "italic", location),
   )
-  v(-1.1em)
+  v(0.5em)
 }
 
 // Project heading — name bold top-left, kind + URL italic on second line
@@ -70,7 +69,7 @@
   text(weight: "bold", name)
   v(-0.15em)
   [_#kind --- #link("https://" + url)[#url]_]
-  v(-1.1em)
+  // v(-1.1em)
 }
 
 
@@ -80,20 +79,23 @@
 
 #align(center)[
   #text(size: 17.28pt, weight: "bold")[Shreyas Kalvankar]
-  #v(0.3em)
+  // #v(0.3em)
+
   #text(size: 10pt)[
     #fa-icon("phone") +31 616243845
     #h(5pt) | #h(5pt)
-    #fa-icon("envelope") #link("mailto:shreyaskalvankar@gmail.com")[shreyaskalvankar\@gmail.com]
+    #fa-icon("envelope", solid: true) #link("mailto:shreyaskalvankar@gmail.com")[shreyaskalvankar\@gmail.com]
   ]
-  #v(0.25em)
+
+  // #v(0.25em)
   #text(size: 10pt)[
-    #fa-icon("globe") #link("https://obi-wan-shinobi.github.io")[obi-wan-shinobi.github.io]
+    #fa-icon("globe", solid: true) #link("https://obi-wan-shinobi.github.io")[obi-wan-shinobi.github.io]
     #h(5pt) | #h(5pt)
     #fa-icon("linkedin") #link("https://linkedin.com/in/shreyas-kalvankar")[linkedin.com/in/shreyas-kalvankar]
     #h(5pt) | #h(5pt)
     #fa-icon("github") #link("https://github.com/obi-wan-shinobi")[github.com/obi-wan-shinobi]
   ]
+  #v(-0.5em)
 ]
 
 // ════════════════════════════════════════════════════════════════════
