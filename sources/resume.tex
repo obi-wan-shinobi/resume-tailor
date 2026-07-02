@@ -1,0 +1,162 @@
+\documentclass[10pt,a4paper]{article}
+
+\usepackage[a4paper,margin=0.7in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[hidelinks]{hyperref}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{parskip}
+\usepackage{fontawesome5}
+\usepackage{xcolor}
+
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlist[itemize]{leftmargin=1.2em,itemsep=0.2em,topsep=0.15em,parsep=0em,partopsep=0em}
+
+\definecolor{linkblue}{HTML}{1F4E79}
+\hypersetup{
+    colorlinks=true,
+    urlcolor=linkblue
+}
+
+\titleformat{\section}{\large\bfseries}{}{0em}{}[\titlerule]
+\titlespacing*{\section}{0pt}{0.8em}{0.4em}
+
+\newcommand{\resumeheading}[4]{%
+  \textbf{#1} \hfill #2\\[-0.15em]
+  \textit{#3} \hfill \textit{#4}\\[-1.5em]
+}
+
+\begin{document}
+
+\begin{center}
+	{\LARGE \textbf{Shreyas Kalvankar}}\\[0.3em]
+	% \faMapMarker*~Delft, Netherlands
+	% \quad \textbar \quad
+	\faPhone~+31 616243845
+	\quad \textbar \quad
+	\faEnvelope~\href{mailto:shreyaskalvankar@gmail.com}{shreyaskalvankar@gmail.com}\\[0.25em]
+
+	\faGlobe~\href{https://obi-wan-shinobi.github.io}{obi-wan-shinobi.github.io}
+	\quad \textbar \quad
+	\faLinkedin~\href{https://linkedin.com/in/shreyas-kalvankar}{linkedin.com/in/shreyas-kalvankar}
+	\quad \textbar \quad
+	\faGithub~\href{https://github.com/obi-wan-shinobi}{github.com/obi-wan-shinobi}
+\end{center}
+% \section*{Summary}
+% Machine Learning Research Engineer and Software Engineer with experience building compact neural networks, PyTorch training pipelines, and production-oriented ML systems for edge and resource-constrained environments. Worked on computer vision, distributed training, and data pipelines across research and applied settings.
+
+\section*{Education}
+
+\resumeheading{Technische Universiteit Delft}{September 2024 -- July 2026}{MSc Computer Science -- Machine Learning Applications Engineering \& Algorithmics}{Delft, Netherlands}
+\begin{itemize}
+	\item Master’s thesis: Neural network training dynamics and spectral bias
+
+	      Investigated spectral bias and training dynamics of overparameterized neural networks, combining NTK theory, Fourier/operator analysis, and numerical experiments to study how finite width and sampling affect feature learning.
+\end{itemize}
+
+\resumeheading{Savitribai Phule Pune University}{August 2017 -- May 2021}{Bachelor of Engineering in Computer Engineering}{Pune, India}
+\begin{itemize}
+	\item Bachelor's thesis: Astronomical Image Colorization and Super-resolution using GANs
+\end{itemize}
+\section*{Experience}
+
+\resumeheading{Technische Universiteit Delft}{September 2025 -- Present}{Teaching Assistant}{Delft, Netherlands}
+\begin{itemize}
+	\item Supported MSc courses in Machine and Deep Learning, Statistical Learning, Security and Cryptography, and Constraint Solving.
+	\item Led tutorials, created and graded assignments and exams, and assisted students with debugging implementations.
+\end{itemize}
+
+\resumeheading{Dalton Maag Ltd.}{November 2021 -- February 2024}{Software Developer}{London, United Kingdom}
+\begin{itemize}
+	\item Automated CJK (Chinese-Japanese-Korean) glyph generation using a Python genetic-algorithm POC, demonstrating reduction of production time from \textbf{months to minutes}.
+	\item Developed core features for PriceBot (TypeScript, Ruby on Rails) and productionized it, cutting quote generation time from \textbf{hours to seconds}.
+	\item Designed a containerized GitLab CI/CD pricing health monitor with daily metric scraping and threshold alerting via emails that prevented silent regressions and potential six-figure revenue losses.
+	\item Engineered a Devanagari complexity model and overhauled Arabic, Greek, and Cyrillic models using TypeScript and Ruby on Rails/PostgreSQL, scaling pricing coverage from \textbf{about 300 to about 2,500 glyphs}.
+	\item Modeled effort-scaling heuristics and non-linear design constraints as a dependency graph to automate task scheduling, replacing a fully manual estimation process and reducing planning time from \textbf{hours to minutes}.
+	\item Contributed to DSedit, an internal ElectronJS, VueJS, and Django platform, abstracting complex Unified Font Object (UFO) and Designspace specifications into a reliable GUI to eliminate manual XML editing and compilation errors.
+\end{itemize}
+
+\resumeheading{Relfor Labs Pvt. Ltd.}{September 2022 -- Present}{Machine Learning Research Scientist (Consulting, Part-time)}{Pune, India}
+\begin{itemize}
+	\item Designed compact, decomposable CNN architectures in PyTorch for edge-oriented deployments, enabling low-latency audio transition detection by caching hierarchical time-series embeddings during rolling-window inference.
+	\item Built PyTorch Lightning and Distributed Data Parallel training pipelines on NVIDIA DGX A100, accelerating experimentation by \textbf{about 50\%}.
+	\item Accelerated terabyte-scale (13TB) data preprocessing by \textbf{8x} using Numba JIT compilation and Pandas to optimize CPU utilization.
+	\item Reduced pipeline storage footprint by \textbf{30\%} by migrating UTF-8 data to Apache Arrow, implementing byte-addressable binary storage for rapid memory loading.
+\end{itemize}
+
+\resumeheading{Relfor Labs Pvt. Ltd.}{August 2021 -- November 2021}{Machine Learning Engineer}{Pune, India}
+\begin{itemize}
+	\item Designed CNN architectures for audio classification using mel-spectrograms in PyTorch, steering experimentation to surpass standard baselines, achieving \textbf{about 98.6\%} accuracy and \textbf{about 0.98} F1-score.
+\end{itemize}
+
+
+\section*{Technical Skills}
+\textbf{Languages:} Python, JavaScript, TypeScript, C, C++, Rust, Go\\
+\textbf{Machine Learning:} PyTorch, TensorFlow, Keras, JAX, Optuna\\
+\textbf{Backend and Web:} Ruby on Rails, React, Vue, Django, HTML, CSS\\
+\textbf{Data and Databases:} PostgreSQL, MongoDB, Pandas, Apache Arrow\\
+\textbf{DevOps and Infrastructure:} Docker, CI/CD, container orchestration, observability\\
+\textbf{Cloud and Compute:} Google Cloud Platform, NVIDIA DGX A100, Distributed Data Parallel
+
+\section*{Projects}
+
+\resumeheading
+{BingeBuddy}
+{}
+{Course Project --- \href{https://github.com/kanta8864/binge-buddy}{github.com/kanta8864/binge-buddy}}
+{}
+\begin{itemize}
+	\item Built BingeBuddy, a task-oriented conversational recommendation system for personalized movie and TV series discovery.
+	\item Designed the agent memory architecture to track and recall relevant information from past conversations, using LLM-based workflows to decide what should be stored in long-term memory, what to extract, and how to categorize and merge new information with existing memories.
+	\item Developed the Django backend and used LangChain to orchestrate the agentic workflows for recommendation and memory management.
+	\item Used MongoDB as the long-term memory store and ReactJS for the frontend, enabling more personalized multi-turn recommendations based on prior interactions.
+\end{itemize}
+
+\resumeheading
+{REMLA Project}
+{}
+{Course Project --- \href{https://github.com/remla25-team15/operation}{github.com/remla25-team15/operation}}
+{}
+\begin{itemize}
+	\item Built and deployed a production-oriented machine learning application from scratch with a focus on reproducibility and scalability.
+	\item Used Vagrant, Ansible, Kubernetes, Helm, Istio, DVC, and Git-based CI/CD to manage infrastructure, versioning, and deployment workflows.
+	\item Developed experience with release engineering practices for machine learning systems in a team-based software setting.
+\end{itemize}
+
+\resumeheading
+{Galaxy Morphology Classification}
+{}
+{Research Project --- \href{https://github.com/obi-wan-shinobi/GalaxyEfficientNets}{github.com/obi-wan-shinobi/GalaxyEfficientNets}}
+{}
+\begin{itemize}
+	\item A galaxy morphology classification, based on Kaggle Galaxy Zoo 2 competition, implementing the EﬃcientNet architectures in Tensorflow.
+	\item Built TensorFlow CNNs for galaxy morphology prediction, achieving a top-3 Kaggle ranking for vote-fraction regression with RMSE 0.07765.
+	\item Developed a 7-class galaxy morphology classifier with 93.7\% accuracy and 0.8857 F1-score.
+\end{itemize}
+
+\resumeheading
+{EinsteinPy}
+{}
+{Open Source --- \href{https://github.com/einsteinpy/einsteinpy}{github.com/einsteinpy/einsteinpy}}
+{}
+\begin{itemize}
+	\item Contributed core general relativity metrics and numerical fixes to a community Python library used for scientific computing and education.
+	\item Added the Reissner–Nordström metric, a static solution to the Einstein–Maxwell field equations.
+	\item Fixed issues in the Kerr–Newman and Kerr metric classes.
+	\item Implemented calculations for the event horizon and ergosphere of a Kerr–Newman black hole.
+\end{itemize}
+
+\section*{Publications \& Pre-prints}
+\begin{itemize}
+	\item \textbf{\href{https://dl.gi.de/items/0ff89330-3adf-49b3-8071-53eb7f176488}{Astronomical Image Colorization and Up-scaling with Conditional Generative Adversarial Networks}}, INFORMATIK 2022
+	\item \textbf{\href{https://arxiv.org/abs/2005.11288}{EinsteinPy: A Community Python Package for General Relativity}}, arXiv:2005.11288
+	\item \textbf{\href{https://arxiv.org/abs/2008.13611}{Galaxy Morphology Classification using EfficientNet Architectures}}, arXiv:2008.13611
+\end{itemize}
+
+\section*{Languages}
+English (Fluent, IELTS 8.5, CEFR C2), Dutch (Elementary), Japanese (Elementary)
+
+\end{document}

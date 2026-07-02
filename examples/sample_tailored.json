@@ -1,0 +1,102 @@
+{
+  "summary": "",
+  "experience": [
+    {
+      "company": "Technische Universiteit Delft",
+      "role": "Teaching Assistant",
+      "dates": "September 2025 – Present",
+      "location": "Delft, Netherlands",
+      "bullets": [
+        "Supported MSc courses in Machine and Deep Learning, Statistical Learning, Security and Cryptography, and Constraint Solving.",
+        "Led tutorials, created and graded assignments and exams, and assisted students with debugging implementations."
+      ]
+    },
+    {
+      "company": "Dalton Maag Ltd.",
+      "role": "Software Developer",
+      "dates": "November 2021 – February 2024",
+      "location": "London, United Kingdom",
+      "bullets": [
+        "Automated CJK (Chinese-Japanese-Korean) glyph generation using a Python genetic-algorithm POC, demonstrating reduction of production time from months to minutes.",
+        "Developed core features for PriceBot (TypeScript, Ruby on Rails) and productionized it, cutting quote generation time from hours to seconds.",
+        "Designed a containerized GitLab CI/CD pricing health monitor with daily metric scraping and threshold alerting via emails that prevented silent regressions and potential six-figure revenue losses.",
+        "Engineered a Devanagari complexity model and overhauled Arabic, Greek, and Cyrillic models using TypeScript and Ruby on Rails/PostgreSQL, scaling pricing coverage from about 300 to about 2,500 glyphs.",
+        "Modeled effort-scaling heuristics and non-linear design constraints as a dependency graph to automate task scheduling, replacing a fully manual estimation process and reducing planning time from hours to minutes.",
+        "Contributed to DSedit, an internal ElectronJS, VueJS, and Django platform, abstracting complex Unified Font Object (UFO) and Designspace specifications into a reliable GUI to eliminate manual XML editing and compilation errors."
+      ]
+    },
+    {
+      "company": "Relfor Labs Pvt. Ltd.",
+      "role": "Machine Learning Research Scientist (Consulting, Part-time)",
+      "dates": "September 2022 – Present",
+      "location": "Pune, India",
+      "bullets": [
+        "Designed compact, decomposable CNN architectures in PyTorch for edge-oriented deployments, enabling low-latency audio transition detection by caching hierarchical time-series embeddings during rolling-window inference.",
+        "Built PyTorch Lightning and Distributed Data Parallel training pipelines on NVIDIA DGX A100, accelerating experimentation by about 50%.",
+        "Accelerated terabyte-scale (13TB) data preprocessing by 8x using Numba JIT compilation and Pandas to optimize CPU utilization.",
+        "Reduced pipeline storage footprint by 30% by migrating UTF-8 data to Apache Arrow, implementing byte-addressable binary storage for rapid memory loading."
+      ]
+    },
+    {
+      "company": "Relfor Labs Pvt. Ltd.",
+      "role": "Machine Learning Engineer",
+      "dates": "August 2021 – November 2021",
+      "location": "Pune, India",
+      "bullets": [
+        "Designed CNN architectures for audio classification using mel-spectrograms in PyTorch, steering experimentation to surpass standard baselines, achieving about 98.6% accuracy and about 0.98 F1-score."
+      ]
+    }
+  ],
+  "skills": {
+    "Languages": ["Python", "JavaScript", "TypeScript", "C", "C++", "Rust", "Go"],
+    "Machine Learning": ["PyTorch", "TensorFlow", "Keras", "JAX", "Optuna"],
+    "Backend and Web": ["Ruby on Rails", "React", "Vue", "Django", "HTML", "CSS"],
+    "Data and Databases": ["PostgreSQL", "MongoDB", "Pandas", "Apache Arrow"],
+    "DevOps and Infrastructure": ["Docker", "CI/CD", "container orchestration", "observability"],
+    "Cloud and Compute": ["Google Cloud Platform", "NVIDIA DGX A100", "Distributed Data Parallel"]
+  },
+  "projects": [
+    {
+      "name": "BingeBuddy",
+      "kind": "Course Project",
+      "url": "github.com/kanta8864/binge-buddy",
+      "bullets": [
+        "Built BingeBuddy, a task-oriented conversational recommendation system for personalized movie and TV series discovery.",
+        "Designed the agent memory architecture to track and recall relevant information from past conversations, using LLM-based workflows to decide what should be stored in long-term memory, what to extract, and how to categorize and merge new information with existing memories.",
+        "Developed the Django backend and used LangChain to orchestrate the agentic workflows for recommendation and memory management.",
+        "Used MongoDB as the long-term memory store and ReactJS for the frontend, enabling more personalized multi-turn recommendations based on prior interactions."
+      ]
+    },
+    {
+      "name": "REMLA Project",
+      "kind": "Course Project",
+      "url": "github.com/remla25-team15/operation",
+      "bullets": [
+        "Built and deployed a production-oriented machine learning application from scratch with a focus on reproducibility and scalability.",
+        "Used Vagrant, Ansible, Kubernetes, Helm, Istio, DVC, and Git-based CI/CD to manage infrastructure, versioning, and deployment workflows.",
+        "Developed experience with release engineering practices for machine learning systems in a team-based software setting."
+      ]
+    },
+    {
+      "name": "Galaxy Morphology Classification",
+      "kind": "Research Project",
+      "url": "github.com/obi-wan-shinobi/GalaxyEfficientNets",
+      "bullets": [
+        "A galaxy morphology classification, based on Kaggle Galaxy Zoo 2 competition, implementing the EfficientNet architectures in Tensorflow.",
+        "Built TensorFlow CNNs for galaxy morphology prediction, achieving a top-3 Kaggle ranking for vote-fraction regression with RMSE 0.07765.",
+        "Developed a 7-class galaxy morphology classifier with 93.7% accuracy and 0.8857 F1-score."
+      ]
+    },
+    {
+      "name": "EinsteinPy",
+      "kind": "Open Source",
+      "url": "github.com/einsteinpy/einsteinpy",
+      "bullets": [
+        "Contributed core general relativity metrics and numerical fixes to a community Python library used for scientific computing and education.",
+        "Added the Reissner–Nordström metric, a static solution to the Einstein–Maxwell field equations.",
+        "Fixed issues in the Kerr–Newman and Kerr metric classes.",
+        "Implemented calculations for the event horizon and ergosphere of a Kerr–Newman black hole."
+      ]
+    }
+  ]
+}
