@@ -14,7 +14,15 @@ app = typer.Typer(
 )
 
 
-@app.command()
+@app.callback()
+def main():
+    """
+    Generate tailored resumes from structured data and Typst templates.
+    """
+    pass
+
+
+@app.command(name="render")
 def render_cmd(
     data: Annotated[
         Path,
@@ -47,4 +55,4 @@ def render_cmd(
 ) -> None:
     """Render a resume PDF from a JSON data file and a Typst template."""
     result = render(data_path=data, template_path=template, output_path=out)
-    typer.echo(f"✓ Resume written to {result}")
+    typer.echo(f"Resume written to {result}")
