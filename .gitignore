@@ -8,3 +8,19 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Generated artifacts
+artifacts/
+outputs/
+
+# Job descriptions (personal/sourced data, not project source)
+jobs/
+
+# Logs
+*.log
+
+# OS/editor cruft
+.DS_Store
+.idea/
+.vscode/
+

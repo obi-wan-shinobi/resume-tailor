@@ -8,21 +8,19 @@ import typst
 def render(
     data_path: Path,
     template_path: Path,
-    output_path: Path,
     *,
     root: Path | None = None,
-) -> Path:
+) -> bytes:
     """Compile a Typst template with dynamic JSON data into a PDF.
 
     Args:
         data_path: Path to the JSON file containing dynamic resume content.
         template_path: Path to the Typst template file.
-        output_path: Path where the compiled PDF will be written.
         root: Project root for Typst path resolution. Defaults to
               the parent of the template directory.
 
     Returns:
-        The output_path the PDF was written to.
+        The raw bytes of the compiled PDF.
 
     Raises:
         FileNotFoundError: If data_path or template_path do not exist.
@@ -46,6 +44,4 @@ def render(
         sys_inputs={"data": str(data_path)},
     )
 
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_bytes(pdf_bytes)
-    return output_path
+    return pdf_bytes

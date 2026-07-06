@@ -1,13 +1,56 @@
 # Resume Tailor
 
-Resume Tailor is a standalone tool for generating job-specific resumes from a structured candidate profile, a resume template, and a job description.
+Resume Tailor is a standalone tool for generating job-specific resumes from a candidate profile and a Typst resume template.
 
-The project is designed to be independent of any job board, application tracker, or recruitment platform. It should be possible to use Resume Tailor either:
+Given a job description, it uses an LLM to select, reorder, and rewrite the dynamic sections of your resume (experience, skills, projects) while keeping static sections (name, education, publications) untouched. The output is a tailored resume PDF.
 
-- manually by pasting a job description and generating a resume, or
-- as a component integrated into a larger job intelligence or application management system.
+---
 
-The primary output of the system is a tailored resume in PDF format.
+## Quickstart
+
+### Prerequisites
+
+- Python 3.11+
+- [uv](https://docs.astral.sh/uv/) for dependency management
+- At least one LLM CLI backend installed and authenticated: [`agy`](https://antigravity.google/) (Antigravity CLI) and/or [`claude`](https://claude.com/claude-code) (Claude Code CLI)
+
+### Installation
+
+```bash
+uv sync
+```
+
+This installs all dependencies and the `resume-tailor` CLI in the project virtual environment.
+
+### Render a resume
+
+```bash
+uv run resume-tailor render \
+  examples/sample_tailored.json \
+  --template templates/resume.typ \
+  --out artifacts/resume.pdf
+```
+
+Or compile directly with Typst:
+
+```bash
+uv run typst compile templates/resume.typ \
+  --input data=examples/sample_tailored.json \
+  --root . \
+  outputs/resume.pdf
+```
+
+Both produce the same PDF. The CLI wraps the Typst compilation with validation and convenience defaults.
+
+### Tailor a resume for a job
+
+```bash
+uv run resume-tailor tailor \
+  jobs/booking_ml_engineer.txt \
+  --agent claude
+```
+
+This runs the full single-call LLM pipeline (JD analysis + profile matching + tailored resume generation in one prompt), validates the output against the schema, renders the PDF, and writes all intermediate artifacts under `artifacts/<job_id>/`.
 
 ---
 
@@ -19,7 +62,7 @@ The primary output of the system is a tailored resume in PDF format.
 - Maintain a single source of truth for candidate information.
 - Avoid hallucinating experience, skills, or achievements.
 - Produce deterministic, reproducible resume documents.
-- Support multiple LLM backends (Claude Code, Gemini CLI, Codex, etc.).
+- Support multiple LLM backends (Antigravity, Claude Code, Codex, etc.) interchangeably.
 - Remain usable as a standalone command-line application.
 
 ### Non-Goals
@@ -33,336 +76,221 @@ These responsibilities belong in external systems.
 
 ---
 
-## Design Principles
+## Design
 
-### 1. Profile-First
+### Template-Driven Rendering
 
-The candidate profile is the source of truth.
+Resume Tailor uses a **Typst template with JSON data injection**. The template contains two kinds of content:
 
-LLMs may:
+**Static sections** are hardcoded in the template and never change between applications:
 
-- select information,
-- reorder information,
-- rewrite information for clarity,
+- Name and contact information
+- Education
+- Publications
+- Spoken languages
 
-but they may not invent facts that do not exist in the profile.
+**Dynamic sections** are loaded from a JSON data file and tailored per job application:
 
-### 2. Structured Outputs
+- Experience (reorder roles, select/condense/rewrite bullets)
+- Technical Skills (reorder categories, highlight relevant skills)
+- Projects (select which to include, tailor bullets)
+- Summary (optional, written per job)
 
-LLMs should never directly generate PDFs.
+The Typst template (`templates/resume.typ`) uses Typst's built-in `json()` function and scripting (`#for`, `#if`) to render dynamic content. No external templating engine (e.g. Jinja2) is needed.
 
-Instead, each stage produces structured artifacts that can be inspected, validated, and modified.
+### Dynamic Data Contract
 
-Example:
-
-```text
-Job Description
-    ↓
-JD Analysis
-    ↓
-Profile Match
-    ↓
-Resume Plan
-    ↓
-Typst Renderer
-    ↓
-PDF
-```
-
-### 3. LLM Independence
-
-The system should not depend on any single model provider.
-
-All LLM interactions occur through a common agent interface.
-
-Possible backends:
-
-- Claude Code
-- Gemini CLI
-- Codex
-- Local models
-- Mock implementations
-
-### 4. Human Inspectability
-
-Every intermediate artifact should be readable.
-
-A user should be able to inspect:
-
-- extracted requirements,
-- matched experiences,
-- selected projects,
-- generated summaries,
-- final resume structure.
-
-### 5. Deterministic Rendering
-
-Resume rendering should not depend on an LLM.
-
-Rendering should be performed by Typst using structured resume data.
-
----
-
-## High-Level Architecture
-
-```text
-┌─────────────────┐
-│ Job Description │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│   JD Analysis   │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ Profile Matching│
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│  Resume Plan    │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ Typst Renderer  │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│   Resume PDF    │
-└─────────────────┘
-```
-
----
-
-## Inputs
-
-### Job Description
-
-A job description may be provided as:
-
-- plain text
-- markdown
-- copied content from a job board
-
-Example:
-
-```text
-Machine Learning Platform Engineer
-
-Responsibilities:
-- Build ML infrastructure
-- Productionize machine learning systems
-- Support model deployment
-```
-
-### Candidate Profile
-
-The candidate profile contains all information that may appear on a resume.
-
-Example:
-
-```yaml
-experience:
-  - company: Dalton Maag
-    role: Software Developer
-    bullets:
-      - Built internal automation tools
-      - Developed monitoring and observability features
-
-projects:
-  - name: Master's Thesis
-    bullets:
-      - Studied training dynamics of neural networks
-```
-
-### Resume Template
-
-A Typst template defines visual layout and formatting.
-
-Templates should not contain tailoring logic.
-
----
-
-## Intermediate Artifacts
-
-### JD Analysis
-
-Extracted information from the job description.
-
-Example:
+The JSON data file — the output of the tailoring pipeline — has this shape:
 
 ```json
 {
-  "role_title": "Machine Learning Platform Engineer",
-  "required_skills": ["Python", "Machine Learning", "Docker"]
+  "summary": "Optional tailored summary...",
+  "experience": [
+    {
+      "company": "Company Name",
+      "role": "Role Title",
+      "dates": "Start – End",
+      "location": "City, Country",
+      "bullets": ["Bullet 1", "Bullet 2"]
+    }
+  ],
+  "skills": {
+    "Category": ["Skill 1", "Skill 2"]
+  },
+  "projects": [
+    {
+      "name": "Project Name",
+      "kind": "Course Project",
+      "url": "github.com/user/repo",
+      "bullets": ["Bullet 1", "Bullet 2"]
+    }
+  ]
 }
 ```
 
-### Profile Match
+See `examples/sample_tailored.json` for a complete example, and `src/resume_tailor/schemas/__init__.py` for the Pydantic models (`JDAnalysis`, `ProfileMatch`, `TailoredResume`, `TailorResult`) that validate it.
 
-Mapping between requirements and profile evidence.
+### Profile-First
 
-Example:
+The candidate profile (`sources/complete-profile.md`) is the source of truth, and `sources/baseline.json` is the untailored dynamic-content baseline. LLMs may select, reorder, and rewrite information for clarity, but they may not invent facts that do not exist in the profile.
 
-```json
-{
-  "strong_matches": ["Python", "Machine Learning"],
-  "recommended_projects": ["Master's Thesis"]
-}
+### Single-Call Pipeline
+
+The tailoring pipeline makes a single LLM call:
+
+```text
+Job Description + Candidate Profile + Baseline JSON
+                     ↓  LLM
+               tailored.json (jd_analysis + profile_match + tailored_resume)
+                     ↓  Typst
+                  resume.pdf
 ```
 
-### Resume Plan
+The LLM receives the job description, the full candidate profile, and the baseline resume JSON in one prompt (`src/resume_tailor/agents/prompts.py`), and returns a single JSON object containing the JD analysis, profile match, and tailored resume together. Each piece is validated against its schema before the resume is rendered.
 
-Structured representation of the final resume.
+### Agent Architecture
 
-Example:
+Every backend implements one interface — `Agent._complete(prompt) -> str` — and the shared pipeline (`Agent.tailor()` in `src/resume_tailor/agents/base.py`) builds the prompt, calls `_complete()`, extracts/validates JSON, and returns a `TailorResult`. This keeps file-writing backends (CLIs) and future response-based backends (a direct API call) structurally identical — they only differ in *how* the raw text is produced.
 
-```json
-{
-  "summary": "...",
-  "experience": [...],
-  "projects": [...],
-  "skills": [...]
-}
+```text
+Agent (abstract: _complete(), _extract_json(), tailor())
+  └── CLIAgent (subprocess + model-fallback loop + temp output file)
+        ├── AgyAgent    — shells out to `agy`
+        └── ClaudeAgent — shells out to `claude`
+MockAgent (Agent)         — no LLM call, used for testing
 ```
 
-The renderer consumes this artifact.
+`CLIAgent` appends a file-output instruction to the prompt, runs the CLI as a subprocess, and reads back the JSON file the CLI is instructed to write. If a model fails, it retries with the next model in the backend's fallback list. A concrete CLI backend only needs to declare `DEFAULT_MODELS` and `_build_command()`.
+
+The agent backend is selected via the `--agent` flag (`agy`, `claude`, or `mock`). `codex` is a planned backend, not yet implemented.
 
 ---
 
-## Agent System
-
-Resume Tailor uses an agent abstraction layer.
+## Repository Layout
 
 ```text
-Pipeline
-    │
-    ▼
-Agent Interface
-    │
-    ├── Claude Code
-    ├── Gemini CLI
-    ├── Codex
-    ├── Local Model
-    └── Mock Agent
+resume-tailor/
+├── src/resume_tailor/
+│   ├── __init__.py          # CLI entry point (`main`)
+│   ├── cli.py                # Typer CLI commands: `render`, `tailor`
+│   ├── renderer.py           # Typst compilation wrapper
+│   ├── schemas/               # Pydantic models for validation
+│   ├── storage/               # Artifact storage (local filesystem)
+│   └── agents/
+│       ├── base.py            # `Agent` — pipeline + JSON extraction
+│       ├── cli.py             # `CLIAgent`, `AgyAgent`, `ClaudeAgent`
+│       ├── mock.py            # `MockAgent`
+│       └── prompts.py         # Shared tailoring prompt + file-output instruction
+├── templates/
+│   └── resume.typ            # Typst template (static + dynamic)
+├── sources/
+│   ├── complete-profile.md   # Detailed candidate profile (source of truth)
+│   ├── baseline.json         # Untailored baseline dynamic content
+│   └── resume.tex            # Original LaTeX resume (reference)
+├── examples/
+│   ├── job.md                 # Example job description
+│   └── sample_tailored.json  # Example tailored dynamic content
+├── jobs/                      # Real job descriptions used for tailoring runs
+├── artifacts/                 # Per-job run artifacts (gitignored)
+├── pyproject.toml
+└── README.md
 ```
 
-Each pipeline stage may use a different backend.
+### Template
 
-Example:
+The Typst template (`templates/resume.typ`) is a faithful port of the original LaTeX resume. It uses:
 
-```yaml
-agents:
-  parse_jd: gemini_cli
-  match_profile: claude_code
-  generate_plan: codex
-```
+- **New Computer Modern** font (equivalent to LaTeX's `lmodern`)
+- **Font Awesome** icons via the `@preview/fontawesome` Typst package
+- **Link color** `#1F4E79` matching the LaTeX original
+
+To edit the template, modify `templates/resume.typ` directly. Static content (name, education, etc.) is plaintext in the file. Dynamic sections use Typst's `#for` loops over the JSON data.
+
+To make a section dynamic that is currently static, move its content from the template into the JSON data file and add a `#for` loop to render it.
 
 ---
 
-## Typical Workflow
+## CLI Commands
 
-### Manual Usage
+### `render`
 
-```text
-Paste Job Description
-        ↓
-Generate Resume
-        ↓
-Review Resume Plan
-        ↓
-Export PDF
+Render a resume PDF from a JSON data file and a Typst template. No LLM is used.
+
+```bash
+uv run resume-tailor render \
+  examples/sample_tailored.json \
+  --template templates/resume.typ \
+  --out artifacts/resume.pdf
 ```
 
-### Integrated Usage
+| Argument/Flag | Description | Default |
+|---------------|-------------|---------|
+| `DATA` | Path to the JSON data file | (required) |
+| `--template`, `-t` | Path to the Typst template | `templates/resume.typ` |
+| `--out`, `-o` | Output PDF path | `artifacts/resume.pdf` |
 
-```text
-Job Intelligence System
-          ↓
-    Job Description
-          ↓
-     Resume Tailor
-          ↓
-      Resume PDF
+### `tailor`
+
+Generate a tailored resume for a specific job description using an LLM agent.
+
+```bash
+uv run resume-tailor tailor \
+  jobs/booking_ml_engineer.txt \
+  --agent claude \
+  --model opus
 ```
+
+| Argument/Flag | Description | Default |
+|---------------|-------------|---------|
+| `JOB` | Path to the job description (text or markdown) | (required) |
+| `--profile`, `-p` | Path to the candidate profile | `sources/complete-profile.md` |
+| `--template`, `-t` | Path to the Typst template | `templates/resume.typ` |
+| `--baseline`, `-b` | Path to the baseline resume JSON | `sources/baseline.json` |
+| `--agent`, `-a` | Agent backend to use (`agy`, `claude`, `mock`) | `agy` |
+| `--model`, `-m` | Specific model(s) to use; repeatable for fallbacks | backend's default list |
+| `--save-artifacts` | Save intermediate artifacts (`jd_analysis.json`, `profile_match.json`, `tailored.json`) | `true` |
+
+There is no `--out` flag on `tailor` — the output PDF and all artifacts are written to `artifacts/<job_id>/` automatically, where `<job_id>` is derived from the job file's stem.
 
 ---
 
-## Future Extensions
+## Artifacts
 
-### Cover Letters
-
-```text
-Job Description
-        +
-Candidate Profile
-        ↓
-Cover Letter
-```
-
-### Recruiter Messages
+Every `tailor` run writes to `artifacts/<job_id>/`:
 
 ```text
-Job Description
-        ↓
-Personalized Outreach Message
+artifacts/
+  booking_ml_engineer/
+    original_job.txt
+    llm_prompt.txt
+    llm_raw_response.txt
+    jd_analysis.json
+    profile_match.json
+    tailored.json
+    booking_ml_engineer_resume.pdf
+    tailor.log
 ```
 
-### Application Packages
-
-```text
-Resume
-Cover Letter
-Recruiter Message
-Portfolio Links
-```
-
-### Multi-Resume Profiles
-
-Support multiple profile variants:
-
-```text
-Research
-Backend Engineering
-ML Engineering
-ML Platform
-Data Science
-```
-
-generated from a shared profile source.
+`tailor.log` records per-run progress and any model-fallback warnings.
 
 ---
 
 ## Roadmap
 
-### Phase 1
+### Done
 
-- Define schemas
-- Define profile format
-- Create Typst template
-- Implement PDF rendering
+- Typst template with static/dynamic sections, JSON data contract, `render` command
+- Tailored JSON schema (Pydantic validation)
+- Single-call agent pipeline (`Agent` / `CLIAgent` base classes)
+- `agy` and `claude` CLI backends, plus a `mock` backend for testing
+- `tailor` CLI command with model fallback and artifact/logging support
 
-### Phase 2
+### Planned
 
-- Implement JD analysis
-- Implement profile matching
-- Implement resume plan generation
-
-### Phase 3
-
-- Add Claude Code integration
-- Add Gemini CLI integration
-- Add Codex integration
-
-### Phase 4
-
-- Add cover letter generation
-- Add profile management
-- Add API server
+- `codex` CLI backend
+- Output quality evaluation
+- Cover letter generation
+- HTTP API server (thin wrapper over the same agent pipeline, for use by job-intelligence-board)
 
 ---
 
@@ -373,411 +301,3 @@ Resume Tailor is not an LLM wrapper.
 It is a document generation pipeline that uses LLMs as interchangeable components within a structured, inspectable, and reproducible workflow.
 
 The candidate profile remains the source of truth, and all generated documents should be traceable back to information explicitly contained in that profile.
-
-## API Contracts
-
-Resume Tailor should expose the same core functionality through both a CLI and, later, an HTTP API.
-
-The CLI is the first-class interface for the MVP. The HTTP API should be a thin wrapper around the same pipeline functions.
-
----
-
-## CLI Contract
-
-### Render Existing Resume Plan
-
-```bash
-resume-tailor render \
-  --plan examples/resume_plan.json \
-  --template templates/resume.typ \
-  --out outputs/resume.pdf
-```
-
-Inputs:
-
-- `resume_plan.json`
-- `resume.typ`
-
-Outputs:
-
-- `resume.pdf`
-
-No LLM is used in this command.
-
----
-
-### Parse Job Description
-
-```bash
-resume-tailor parse-jd \
-  --job examples/job.md \
-  --out outputs/jd_analysis.json \
-  --agent gemini_cli
-```
-
-Inputs:
-
-- raw job description
-
-Outputs:
-
-- structured job description analysis
-
----
-
-### Match Profile Against Job
-
-```bash
-resume-tailor match-profile \
-  --jd outputs/jd_analysis.json \
-  --profile examples/profile.yaml \
-  --out outputs/profile_match.json \
-  --agent claude_code
-```
-
-Inputs:
-
-- `jd_analysis.json`
-- `profile.yaml`
-
-Outputs:
-
-- `profile_match.json`
-
----
-
-### Generate Resume Plan
-
-```bash
-resume-tailor generate-plan \
-  --jd outputs/jd_analysis.json \
-  --match outputs/profile_match.json \
-  --profile examples/profile.yaml \
-  --out outputs/resume_plan.json \
-  --agent codex
-```
-
-Inputs:
-
-- `jd_analysis.json`
-- `profile_match.json`
-- `profile.yaml`
-
-Outputs:
-
-- `resume_plan.json`
-
----
-
-### Full Tailoring Pipeline
-
-```bash
-resume-tailor tailor \
-  --job examples/job.md \
-  --profile examples/profile.yaml \
-  --template templates/resume.typ \
-  --out outputs/resume.pdf \
-  --config resume-tailor.yaml
-```
-
-Inputs:
-
-- job description
-- candidate profile
-- resume template
-- agent configuration
-
-Outputs:
-
-- `jd_analysis.json`
-- `profile_match.json`
-- `resume_plan.json`
-- `resume.pdf`
-
----
-
-## Python API Contract
-
-The CLI should call a Python API internally.
-
-Example:
-
-```python
-from pathlib import Path
-from resume_tailor.pipeline import tailor_resume
-
-result = tailor_resume(
-    job_path=Path("examples/job.md"),
-    profile_path=Path("examples/profile.yaml"),
-    template_path=Path("templates/resume.typ"),
-    output_path=Path("outputs/resume.pdf"),
-    config_path=Path("resume-tailor.yaml"),
-)
-```
-
-Expected result:
-
-```python
-TailorResult(
-    jd_analysis_path=Path("outputs/jd_analysis.json"),
-    profile_match_path=Path("outputs/profile_match.json"),
-    resume_plan_path=Path("outputs/resume_plan.json"),
-    pdf_path=Path("outputs/resume.pdf"),
-)
-```
-
----
-
-## Future HTTP API Contract
-
-The HTTP API should be added later, after the CLI pipeline is stable.
-
-### `POST /v1/tailor`
-
-Generate a tailored resume from raw inputs.
-
-Request:
-
-```json
-{
-  "job_description": "...",
-  "profile": {
-    "name": "Candidate Name",
-    "experience": [],
-    "projects": [],
-    "skills": []
-  },
-  "template_id": "default",
-  "agent_config": {
-    "parse_jd": "gemini_cli",
-    "match_profile": "claude_code",
-    "generate_plan": "codex"
-  }
-}
-```
-
-Response:
-
-```json
-{
-  "run_id": "run_123",
-  "status": "completed",
-  "artifacts": {
-    "jd_analysis": "/artifacts/run_123/jd_analysis.json",
-    "profile_match": "/artifacts/run_123/profile_match.json",
-    "resume_plan": "/artifacts/run_123/resume_plan.json",
-    "resume_pdf": "/artifacts/run_123/resume.pdf"
-  }
-}
-```
-
----
-
-### `POST /v1/parse-jd`
-
-Request:
-
-```json
-{
-  "job_description": "...",
-  "agent": "gemini_cli"
-}
-```
-
-Response:
-
-```json
-{
-  "role_title": "Machine Learning Platform Engineer",
-  "company": "Picnic",
-  "responsibilities": [],
-  "required_skills": [],
-  "preferred_skills": [],
-  "domain_keywords": [],
-  "seniority": "mid"
-}
-```
-
----
-
-### `POST /v1/match-profile`
-
-Request:
-
-```json
-{
-  "jd_analysis": {
-    "role_title": "Machine Learning Platform Engineer",
-    "required_skills": []
-  },
-  "profile": {
-    "experience": [],
-    "projects": [],
-    "skills": []
-  },
-  "agent": "claude_code"
-}
-```
-
-Response:
-
-```json
-{
-  "strong_matches": [],
-  "partial_matches": [],
-  "missing_requirements": [],
-  "recommended_experience": [],
-  "recommended_projects": [],
-  "recommended_skills": []
-}
-```
-
----
-
-### `POST /v1/generate-plan`
-
-Request:
-
-```json
-{
-  "jd_analysis": {},
-  "profile_match": {},
-  "profile": {},
-  "agent": "codex"
-}
-```
-
-Response:
-
-```json
-{
-  "name": "Candidate Name",
-  "summary": "...",
-  "experience": [],
-  "projects": [],
-  "education": [],
-  "skills": []
-}
-```
-
----
-
-### `POST /v1/render`
-
-Render a resume plan into a PDF.
-
-Request:
-
-```json
-{
-  "resume_plan": {},
-  "template_id": "default"
-}
-```
-
-Response:
-
-```json
-{
-  "status": "completed",
-  "resume_pdf": "/artifacts/run_123/resume.pdf"
-}
-```
-
-This endpoint should not call an LLM.
-
----
-
-## Artifact Contract
-
-Every full tailoring run should create a run directory:
-
-```text
-outputs/
-  runs/
-    run_123/
-      input_job.md
-      input_profile.yaml
-      jd_analysis.json
-      profile_match.json
-      resume_plan.json
-      resume.typ
-      resume.pdf
-      metadata.json
-```
-
-`metadata.json` should contain:
-
-```json
-{
-  "run_id": "run_123",
-  "created_at": "2026-06-15T20:30:00Z",
-  "agents": {
-    "parse_jd": "gemini_cli",
-    "match_profile": "claude_code",
-    "generate_plan": "codex"
-  },
-  "template": "default",
-  "status": "completed"
-}
-```
-
----
-
-## Error Contract
-
-Errors should be structured.
-
-Example:
-
-```json
-{
-  "status": "failed",
-  "stage": "generate_plan",
-  "error_type": "schema_validation_error",
-  "message": "Generated resume_plan.json did not match the expected schema.",
-  "artifact_path": "outputs/runs/run_123/resume_plan.invalid.json"
-}
-```
-
-Common error types:
-
-- `agent_execution_error`
-- `schema_validation_error`
-- `missing_input_error`
-- `render_error`
-- `configuration_error`
-- `unsupported_agent_error`
-
----
-
-## Agent Contract
-
-All agent backends should implement the same interface.
-
-```python
-class Agent:
-    def run(self, task: AgentTask) -> AgentResult:
-        ...
-```
-
-```python
-class AgentTask:
-    stage: str
-    prompt: str
-    input_files: list[Path]
-    output_file: Path
-    schema_file: Path | None
-```
-
-```python
-class AgentResult:
-    stage: str
-    output_file: Path
-    raw_output_file: Path | None
-    success: bool
-```
-
-Agents are responsible for producing files.
-
-The pipeline is responsible for validating those files.
