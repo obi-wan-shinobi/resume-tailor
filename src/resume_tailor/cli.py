@@ -181,10 +181,17 @@ def tailor(
             typer.secho(f"  -> Tailored JSON: {tailored_path}", fg=typer.colors.BLUE)
             logger.info(f"Saved Tailored JSON to {tailored_path}")
 
+        # Copy the template alongside the tailored data so it can be hand-edited
+        # and re-rendered later without touching the shared template.
+        store.write_artifact(job_id, template.name, template.read_text())
+        template_path = store.get_local_path(job_id, template.name)
+        typer.secho(f"  -> Template copy: {template_path}", fg=typer.colors.BLUE)
+        logger.info(f"Saved template copy to {template_path}")
+
         # Render the PDF
         pdf_bytes = render(
             data_path=tailored_path,
-            template_path=template,
+            template_path=template_path,
         )
         pdf_path = store.write_pdf(job_id, f"{job_id}_resume.pdf", pdf_bytes)
         typer.secho(f"✓ Resume written to {pdf_path}", fg=typer.colors.GREEN)

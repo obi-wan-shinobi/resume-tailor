@@ -166,6 +166,40 @@ The agent backend is selected via the `--agent` flag (`agy`, `claude`, or `mock`
 
 ---
 
+## HTTP API
+
+Resume Tailor also ships a thin FastAPI wrapper (`src/resume_tailor/api.py`) around the same tailoring pipeline, for use by external callers (e.g. job-intelligence-board) that want a tailored PDF over HTTP instead of a CLI invocation.
+
+```bash
+uv run resume-tailor-api
+```
+
+This starts a Uvicorn server on `0.0.0.0:8000`.
+
+| Endpoint | Method | Description |
+|----------|--------|--------------|
+| `/health` | `GET` | Liveness check — returns `{"status": "ok"}` |
+| `/tailor` | `POST` | Runs the tailor pipeline and returns the rendered PDF |
+
+`POST /tailor` request body:
+
+```json
+{
+  "job_id": "booking-ml-engineer",
+  "company": "Booking.com",
+  "title": "ML Engineer",
+  "description": "Full job description text...",
+  "agent": "claude",
+  "models": null
+}
+```
+
+`job_id`/`description` are required; `company`/`title` are informational only; `agent` defaults to `claude`; `models` optionally overrides the backend's default model fallback list. On success the response is the tailored resume PDF (`application/pdf`, `Content-Disposition: attachment`). Intermediate artifacts (`jd_analysis.json`, `profile_match.json`, `tailored.json`) are written to `artifacts/job-<job_id>/` via `LocalFileStore`, the same as the CLI's `tailor` command. Failures surface as `400` (empty description) or `500` (pipeline error) with a JSON `detail` message.
+
+The API always uses the default profile (`sources/complete-profile.md`), template (`templates/resume.typ`), and baseline (`sources/baseline.json`) — there is no per-request override, unlike the CLI's `--profile`/`--template`/`--baseline` flags.
+
+---
+
 ## Repository Layout
 
 ```text
@@ -173,6 +207,7 @@ resume-tailor/
 ├── src/resume_tailor/
 │   ├── __init__.py          # CLI entry point (`main`)
 │   ├── cli.py                # Typer CLI commands: `render`, `tailor`
+│   ├── api.py                 # FastAPI wrapper (`/health`, `/tailor`)
 │   ├── renderer.py           # Typst compilation wrapper
 │   ├── schemas/               # Pydantic models for validation
 │   ├── storage/               # Artifact storage (local filesystem)
@@ -267,11 +302,12 @@ artifacts/
     jd_analysis.json
     profile_match.json
     tailored.json
+    resume.typ
     booking_ml_engineer_resume.pdf
     tailor.log
 ```
 
-`tailor.log` records per-run progress and any model-fallback warnings.
+`tailor.log` records per-run progress and any model-fallback warnings. `resume.typ` is a per-run copy of the template used to render that job's PDF, so it can be hand-edited and re-rendered later (via `render`) without touching the shared template in `templates/`.
 
 ---
 
@@ -284,13 +320,13 @@ artifacts/
 - Single-call agent pipeline (`Agent` / `CLIAgent` base classes)
 - `agy` and `claude` CLI backends, plus a `mock` backend for testing
 - `tailor` CLI command with model fallback and artifact/logging support
+- HTTP API server (`resume-tailor-api`) — thin FastAPI wrapper over the same agent pipeline, for use by job-intelligence-board
 
 ### Planned
 
 - `codex` CLI backend
 - Output quality evaluation
 - Cover letter generation
-- HTTP API server (thin wrapper over the same agent pipeline, for use by job-intelligence-board)
 
 ---
 

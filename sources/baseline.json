@@ -4,7 +4,7 @@
     {
       "company": "Technische Universiteit Delft",
       "role": "Teaching Assistant",
-      "dates": "September 2025 – Present",
+      "dates": "September 2025 – May 2026",
       "location": "Delft, Netherlands",
       "bullets": [
         "Supported MSc courses in Machine and Deep Learning, Statistical Learning, Security and Cryptography, and Constraint Solving.",
@@ -22,7 +22,8 @@
         "Designed a containerized GitLab CI/CD pricing health monitor with daily metric scraping and threshold alerting via emails that prevented silent regressions and potential six-figure revenue losses.",
         "Engineered a Devanagari complexity model and overhauled Arabic, Greek, and Cyrillic models using TypeScript and Ruby on Rails/PostgreSQL, scaling pricing coverage from about 300 to about 2,500 glyphs.",
         "Modeled effort-scaling heuristics and non-linear design constraints as a dependency graph to automate task scheduling, replacing a fully manual estimation process and reducing planning time from hours to minutes.",
-        "Contributed to DSedit, an internal ElectronJS, VueJS, and Django platform, abstracting complex Unified Font Object (UFO) and Designspace specifications into a reliable GUI to eliminate manual XML editing and compilation errors."
+        "Contributed to DSedit, an internal ElectronJS, VueJS, and Django platform, abstracting complex Unified Font Object (UFO) and Designspace specifications into a reliable GUI to eliminate manual XML editing and compilation errors.",
+        "Extended DaMaDoit, an internal Python build system (fontTools, fontmake, doit) that compiles font sources into binaries, with COLR v1 color-font support and cross-stage fixes to variable-font generation, substitution, and hinting."
       ]
     },
     {
@@ -48,12 +49,36 @@
     }
   ],
   "skills": {
-    "Languages": ["Python", "JavaScript", "TypeScript", "C", "C++", "Rust", "Go"],
+    "Languages": [
+      "Python",
+      "JavaScript",
+      "TypeScript",
+      "C",
+      "C++",
+      "Rust",
+      "Go"
+    ],
     "Machine Learning": ["PyTorch", "TensorFlow", "Keras", "JAX", "Optuna"],
-    "Backend and Web": ["Ruby on Rails", "React", "Vue", "Django", "HTML", "CSS"],
+    "Backend and Web": [
+      "Ruby on Rails",
+      "React",
+      "Vue",
+      "Django",
+      "HTML",
+      "CSS"
+    ],
     "Data and Databases": ["PostgreSQL", "MongoDB", "Pandas", "Apache Arrow"],
-    "DevOps and Infrastructure": ["Docker", "CI/CD", "container orchestration", "observability"],
-    "Cloud and Compute": ["Google Cloud Platform", "NVIDIA DGX A100", "Distributed Data Parallel"]
+    "DevOps and Infrastructure": [
+      "Docker",
+      "CI/CD",
+      "container orchestration",
+      "observability"
+    ],
+    "Cloud and Compute": [
+      "Google Cloud Platform",
+      "NVIDIA DGX A100",
+      "Distributed Data Parallel"
+    ]
   },
   "projects": [
     {

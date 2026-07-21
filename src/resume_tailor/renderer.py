@@ -37,11 +37,13 @@ def render(
 
     # The data path is passed as a sys.input so the template can load it
     # via json(sys.inputs.at("data")).  The template prepends "../" to
-    # navigate from templates/ up to the project root.
+    # navigate from templates/ up to the project root, so this must be
+    # relative to `root`, not the current working directory.
+    data_rel = data_path.resolve().relative_to(root.resolve())
     pdf_bytes: bytes = typst.compile(
         str(template_path),
         root=str(root),
-        sys_inputs={"data": str(data_path)},
+        sys_inputs={"data": data_rel.as_posix()},
     )
 
     return pdf_bytes

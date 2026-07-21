@@ -8,14 +8,17 @@ authors = [
 ]
 requires-python = ">=3.11"
 dependencies = [
+    "fastapi>=0.121.0",
     "pydantic>=2.13.4",
     "pyyaml>=6.0.3",
     "typer>=0.26.8",
     "typst>=0.15.0",
+    "uvicorn[standard]>=0.38.0",
 ]
 
 [project.scripts]
 resume-tailor = "resume_tailor:main"
+resume-tailor-api = "resume_tailor.api:main"
 
 [build-system]
 requires = ["uv_build>=0.11.6,<0.12.0"]

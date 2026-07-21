@@ -19,6 +19,16 @@ jobs/
 # Logs
 *.log
 
+# Env / secrets
+.env
+.env.*
+
+# Test / lint / type-check caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+
 # OS/editor cruft
 .DS_Store
 .idea/

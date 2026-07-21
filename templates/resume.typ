@@ -15,7 +15,12 @@
 // ── Page Setup ──
 #set page(
   paper: "a4",
-  margin: 0.7in,
+  margin: ( 
+    top: 0.7in,
+    bottom:0.7in,
+    left:0.7in,
+    right:0.7in
+  ),
   header: none,
   footer: none,
 )

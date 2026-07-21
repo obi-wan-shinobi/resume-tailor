@@ -48,6 +48,17 @@
   - **Automated Cascading Updates:** When a user changed an axis value or filename in the UI, the Django backend ensured every relevant XML table was updated correctly to maintain spec compliance.
 - **Outcome:** Eliminated manual XML editing and prevented widespread font compilation failures.
 
+### **6. DaMaDoit: Font Build System & Compilation Toolchain**
+
+- **The Problem:** Font projects are authored in source formats (UFO, .glyphs, .designspace) that can't ship directly. They have to be compiled into binaries (TTF, OTF, and other output formats) through a multi-stage pipeline covering hinting, variable-font generation, glyph substitution, and more. Doing this by hand, or with ad-hoc scripts, is error-prone, slow, and hard to reproduce across projects.
+- **The Solution:** Developed features for and maintained DaMaDoit, an internal Python build system built on top of the doit task runner that automated compiling, packaging, and releasing font binaries from source files. It wrapped fontTools, fontmake, and other font APIs into a reproducible pipeline.
+
+- **COLR v1 support:** Added support for the COLR v1 color-font standard, extending the pipeline to produce an output format it previously couldn't. Implemented via fontTools/fontmake.
+- **Pipeline maintenance:** Owned and debugged the toolchain across multiple compilation stages, resolving issues in variable-font generation (varLib), glyph substitution, and hinting.
+- **Build orchestration:** Worked within the doit dependency model so build steps ran in the correct order and only re-ran when their inputs changed.
+
+- **Outcome:** Enabled the pipeline to compile modern color fonts it previously couldn't produce, and kept a complex, high-dependency build system reliable across active font projects. (Metric slot: number of font families/projects the pipeline built, or whether COLR v1 work shipped into a released font.)
+
 ---
 
 ## **Role: Machine Learning Research Scientist (Consulting)**
@@ -93,3 +104,45 @@
 - **The Problem:** Initial experimentation relied on generic architectures like InceptionNet, which were designed for 2D images and did not natively capture the nuances of 1D/2D audio Mel-spectrogram time-series.
 - **The Solution:** Steered the research away from "off-the-shelf" models toward custom CNN architectures designed specifically for the spectral features of audio signals.
 - **Outcome:** Achieved a baseline of **~98.6% accuracy** and **~0.98 F1-score** for audio signal classification.
+
+---
+
+# Projects
+
+# BingeBuddy
+
+What it is: A conversational AI agent (course project for DSAIT4065 Conversational Agents, TU Delft) that chats with users about their streaming/movie-watching habits and builds up a persistent memory profile of their preferences to power personalized recommendations — similar in spirit to how a human assistant would remember your taste over many conversations.
+
+Your role: Team project (~4 contributors); you were one of the top two contributors by commit volume (21+ commits), working across the backend agent architecture, LLM integration, and productionizing the app (per your recent commits: "make everything production ready," "frontend bug fixes and readable agent output," "update llm class to pull unavailable models, add bash script to run everything with single command").
+
+Tech stack
+
+- Language: Python (3.9–3.11), managed with Poetry
+- LLM orchestration: LangChain + LangGraph (custom CustomStateGraph wrapper), OpenAI API (GPT models) as primary LLM, with a fallback/local option via Ollama (e.g., DeepSeek, Mistral) for offline/local model testing
+- Web/UI: Flask server with a simple HTML/JS front end (front_end.html), served locally
+- Database: MongoDB (via pymongo), containerized with Docker Compose, for persisting user memory profiles
+- Perception module: OpenAI Whisper for speech-to-text (voice input, using ffmpeg), and a HuggingFace transformers sentiment/emotion classifier (distilbert-base-uncased-emotion) to extract emotional tone from user messages
+- Ops: Shell scripts (init-agent-openai.sh, init-agent-ollama.sh) to bootstrap the whole stack (Docker DB + Flask app) with one command; colorlog-based logging to app.log
+
+Architecture / modules
+
+1. Conversational layer (conversational_agent.py, conversational_agent_manager.py) — manages per-session chat agents, holds shared LLM instance, routes user turns.
+2. Multi-agent memory pipeline (memory_workflow/, agents/) — the core novelty. A LangGraph state machine of specialized LLM agents that cooperate to decide what's worth remembering and store it correctly:
+
+- MemorySentinel — a gatekeeper agent that classifies whether a message contains any memory-worthy info (movie/genre preferences, disliked content, platforms, personality, watching habits, etc.) — pure TRUE/FALSE classification to avoid wasting downstream calls.
+- MemoryExtractor + ExtractorReviewer — extracts structured memory candidates and reviews/repairs them (self-correction loop via conditional graph edges).
+- MemoryAttributor — tags extracted memories with attribute categories.
+- MemoryAggregator + AggregatorReviewer — merges new memories into the user's existing long-term profile, with another review/repair loop.
+- MemoryHandler — final node that persists to MongoDB.
+- This pipeline was implemented and evaluated in two variants — "semantic" (aggregated long-term profile) vs. "episodic" (raw per-event memories) — as an explicit research comparison (see design/README.md nomenclature and evaluation/).
+
+3. Perception module (perception/) — audio transcription (Whisper) and sentiment/emotion extraction, feeding richer signal into the conversation beyond raw text.
+4. State management (agent_state/, state_graph.py) — custom typed state objects and a custom LangGraph-based execution/logging wrapper.
+5. Evaluation (evaluation/) — Jupyter notebook + pandas/seaborn analysis comparing "semantic" vs "episodic" memory strategies using a user trust score metric (boxplots/violin plots across experiment tracking spreadsheets), i.e. you ran a real (if small-scale) user study on your own sy
+6. Design docs (design/) — PlantUML class diagrams and state-transition diagrams for the memory agent and episodic/semantic state machines, plus an Excalidraw architecture diagram — shows a deliberate design-first process, not just ad hoc code.
+   Talking points for "what did you learn when it hit real users" - Multi-agent pipelines need self-correction loops, not just linear chains — you builts (ExtractorReviewer, AggregatorReviewer) with conditional graph edges that route backfor repair when an agent's output is malformed/incomplete. This came from observing LLM agents silently producing bad structured output. - Gatekeeping saves cost/latency — the MemorySentinel binary classifier exists specifi full expensive extraction pipeline on every message.
+
+- Local vs. hosted model tradeoffs — you supported both OpenAI and local Ollama models, and your commit history shows work on gracefully handling "pull unavailable models," suggesting real friction getting local LLMs to behave reliably compared to hosted APIs.
+- Productionizing an academic prototype is its own project — several of your most recent commits are specifically about making a research prototype robust ("make everything production ready," one-command startup scripts, readable agent output, frontend bug fixes) — i.e. the gapin a notebook" and "a user can run this reliably."
+- Empirically comparing memory architectures — rather than assuming aggregated long-term memory ("semantic") beats raw episodic logs, you instrumented a trust-score evaluation with real experiment
+  tracking data to actually test the hypothesis.
